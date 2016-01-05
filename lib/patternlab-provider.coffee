@@ -1,34 +1,32 @@
-module.exports =
-class PatternProvider
+class PatternLabProvider
   # This will work on Mustache files for now
-  selector: '.source.mustache'
-
-  # This will take priority over the default provider, which has a priority of 0.
-  # `excludeLowerPriority` will suppress any providers with a lower priority
-  # i.e. The default provider will be suppressed
-  inclusionPriority: 1
+  selector: '*'
+  inclusionPriority: 2
   excludeLowerPriority: true
-  suggestionPriority: 2
 
   constructor: ->
     console.log('creating provider')
 
-  # Required: Return a promise, an array of suggestions, or null.
-  getSuggestions: ({editor, bufferPosition, scopeDescriptor, prefix, activatedManually}) ->
-    console.log('getting suggestions')
+  getSuggestions: ({editor, bufferPosition, scopeDescriptor, prefix}) ->
+    console.log(editor)
+    console.log(bufferPosition)
+    console.log(scopeDescriptor)
+    console.log(prefix)
     prefix = @getPrefix(editor, bufferPosition)
+    console.log(prefix)
+
     new Promise (resolve) ->
       suggestion =
-        text: 'someText'
-        replacementPrefix: '{{'
-        displayText: 'WORKING?' # (optional)
+        text: '{{atoms-colors}}'
+        replacementPrefix: prefix
+        type: 'snippet'
+        rightLabel: 'Pattern'
+        displayText: 'Atoms Colors'
       resolve([suggestion])
 
-
   getPrefix: (editor, bufferPosition) ->
-    console.log('getPrefix')
     # Whatever your prefix regex might be
-    regex = /{{/
+    regex = /[{{]+$/
 
     # Get the text for the line up to the triggered buffer position
     line = editor.getTextInRange([[bufferPosition.row, 0], bufferPosition])
@@ -36,10 +34,12 @@ class PatternProvider
     # Match the regex to the line, and return the match
     line.match(regex)?[0] or ''
 
-  # (optional): called _after_ the suggestion `replacementPrefix` is replaced
-  # by the suggestion `text` in the buffer
   onDidInsertSuggestion: ({editor, triggerPosition, suggestion}) ->
+    editor.cursors[0].moveLeft(2)
 
-  # (optional): called when your provider needs to be cleaned up. Unsubscribe
-  # from things, kill any processes, etc.
   dispose: ->
+
+  loadPatterns: ->
+    console.log("load patterns")
+
+module.exports = PatternLabProvider
